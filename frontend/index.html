@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FindIt67 — Lost Something? Find It!</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#search" data-nav="search">
+        <span class="brand-mark" aria-hidden="true">F</span>
+        <span>
+          <strong>FindIt</strong><span class="brand-accent">67</span>
+          <small class="brand-sub">Lost Something? Find It!</small>
+        </span>
+      </a>
+
+      <nav aria-label="Primary navigation" class="main-nav">
+        <button type="button" class="nav-btn is-active" data-nav="search">Search &amp; Browse</button>
+        <button type="button" class="nav-btn" data-nav="report">Report Item</button>
+        <button type="button" class="nav-btn" data-nav="matches">Smart Matches</button>
+        <button type="button" class="nav-btn" data-nav="admin">Admin &amp; Claims</button>
+        <button type="button" class="nav-btn" data-nav="account">Account</button>
+      </nav>
+
+      <div class="user-pill" id="session-status" aria-live="polite">
+        Signed in: <strong>Ahmad Mansour</strong> (User)
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <p class="eyebrow">Jira Tracked Project • Key CMM</p>
+        <h1 id="hero-title">Centralized Campus Lost &amp; Found with Smart Matching</h1>
+        <p class="hero-copy">
+          Submit Lost or Found reports, discover rule-based potential matches, and verify ownership safely before handoff.
+        </p>
+      </div>
+      <dl class="stats-grid" aria-label="System report summary">
+        <div class="stat-card">
+          <dt>Open Reports</dt>
+          <dd id="stat-open">0</dd>
+        </div>
+        <div class="stat-card">
+          <dt>Potential Matches</dt>
+          <dd id="stat-matched">0</dd>
+        </div>
+        <div class="stat-card">
+          <dt>Recovered Items</dt>
+          <dd id="stat-recovered">0</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- View 1: Search & Filter (CMM-29, CMM-54) -->
+    <section id="view-search" class="panel" aria-labelledby="search-heading">
+      <div class="panel-header">
+        <h2 id="search-heading">Search &amp; Filter Reports</h2>
+        <span class="badge">CMM-29</span>
+      </div>
+
+      <form id="filter-form" class="filter-grid" novalidate>
+        <div class="field">
+          <label for="filter-q">Keyword or Reference Code</label>
+          <input id="filter-q" name="q" type="search" enterkeyhint="search" placeholder="e.g. backpack, FND-2026">
+        </div>
+        <div class="field">
+          <label for="filter-type">Report Type</label>
+          <select id="filter-type" name="type">
+            <option value="all">All Types</option>
+            <option value="Lost">Lost</option>
+            <option value="Found">Found</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="filter-category">Category</label>
+          <select id="filter-category" name="category">
+            <option value="all">All Categories</option>
+            <option value="Bags">Bags</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Wallets">Wallets</option>
+            <option value="Keys &amp; IDs">Keys &amp; IDs</option>
+            <option value="Accessories">Accessories</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="filter-color">Color</label>
+          <input id="filter-color" name="color" type="text" placeholder="e.g. Black">
+        </div>
+        <div class="field">
+          <label for="filter-location">Location</label>
+          <input id="filter-location" name="location" type="text" placeholder="e.g. Building A">
+        </div>
+        <div class="field">
+          <label for="filter-from">From Date</label>
+          <input id="filter-from" name="from" type="date">
+        </div>
+      </form>
+
+      <div id="reports-grid" class="cards-grid" aria-live="polite"></div>
+    </section>
+
+    <!-- View 2: Create Report with Image Upload (CMM-28, CMM-66) -->
+    <section id="view-report" class="panel" hidden aria-labelledby="report-heading">
+      <div class="panel-header">
+        <h2 id="report-heading">Submit Lost or Found Report</h2>
+        <span class="badge">CMM-28</span>
+      </div>
+
+      <form id="report-form" class="form-grid">
+        <div class="field">
+          <label for="report-type">Report Type</label>
+          <select id="report-type" name="reportType" required data-error="report-type-error">
+            <option value="Lost">Lost Item</option>
+            <option value="Found">Found Item</option>
+          </select>
+          <div id="report-type-error" class="error-msg">
+            <span role="img" aria-label="Error">❌</span> Please choose Lost or Found.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="report-item-name">Item Name</label>
+          <span id="item-name-hint" class="hint">Short title, e.g. Black Laptop Backpack</span>
+          <input id="report-item-name" name="itemName" type="text" required minlength="2" aria-describedby="item-name-hint" data-error="item-name-error">
+          <div id="item-name-error" class="error-msg">
+            <span role="img" aria-label="Error">❌</span> Enter an item name (at least 2 characters).
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="report-category">Category</label>
+          <select id="report-category" name="category" required>
+            <option value="Bags">Bags</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Wallets">Wallets</option>
+            <option value="Keys &amp; IDs">Keys &amp; IDs</option>
+            <option value="Accessories">Accessories</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="report-color">Primary Color</label>
+          <input id="report-color" name="color" type="text" required placeholder="e.g. Black" data-error="color-error">
+          <div id="color-error" class="error-msg">
+            <span role="img" aria-label="Error">❌</span> Enter the item color.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="report-location">Location</label>
+          <input id="report-location" name="location" type="text" required placeholder="e.g. Engineering Building A" data-error="location-error">
+          <div id="location-error" class="error-msg">
+            <span role="img" aria-label="Error">❌</span> Enter the campus or venue location.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="report-date">Date Lost / Found</label>
+          <input id="report-date" name="reportDate" type="date" required data-error="date-error">
+          <div id="date-error" class="error-msg">
+            <span role="img" aria-label="Error">❌</span> Select the date.
+          </div>
+        </div>
+
+        <div class="field field-full">
+          <label for="report-description">Public Description</label>
+          <span id="desc-hint" class="hint">Avoid sharing private serial numbers or hidden marks on Found reports.</span>
+          <textarea id="report-description" name="description" rows="3" required aria-describedby="desc-hint" data-error="desc-error"></textarea>
+          <div id="desc-error" class="error-msg">
+            <span role="img" aria-label="Error">❌</span> Enter a brief description of the item.
+          </div>
+        </div>
+
+        <div class="field field-full">
+          <label for="report-question">Hidden Ownership Verification Question (for Found items)</label>
+          <span id="question-hint" class="hint">Claimants must answer this hidden detail before an admin approves handoff.</span>
+          <input id="report-question" name="verificationQuestion" type="text" aria-describedby="question-hint" placeholder="e.g. What sticker or keychain is on the front pocket?">
+        </div>
+
+        <div class="field field-full">
+          <label for="report-image">Optional Item Photo</label>
+          <input id="report-image" name="image" type="file" accept="image/*">
+        </div>
+
+        <div class="field-full form-actions">
+          <button type="submit" class="btn btn-primary">Publish Report</button>
+          <span id="report-feedback" class="status-note" aria-live="polite"></span>
+        </div>
+      </form>
+    </section>
+
+    <!-- View 3: Rule-Based Smart Matching (CMM-30) -->
+    <section id="view-matches" class="panel" hidden aria-labelledby="matches-heading">
+      <div class="panel-header">
+        <h2 id="matches-heading">Rule-Based Smart Matching System</h2>
+        <span class="badge">CMM-30</span>
+      </div>
+      <p class="section-intro">
+        Select any open report to inspect ranked <strong>Potential Matches</strong> scored deterministically by category, color, location, date window, and shared keywords.
+      </p>
+
+      <div class="field match-picker">
+        <label for="match-source-select">Source Report</label>
+        <select id="match-source-select"></select>
+      </div>
+
+      <div id="matches-list" class="cards-grid" aria-live="polite"></div>
+    </section>
+
+    <!-- View 4: Admin Dashboard & Claim Verification (CMM-31, CMM-32) -->
+    <section id="view-admin" class="panel" hidden aria-labelledby="admin-heading">
+      <div class="panel-header">
+        <h2 id="admin-heading">Admin Claim Review &amp; Report Moderation</h2>
+        <span class="badge">CMM-31 / CMM-32</span>
+      </div>
+
+      <div tabindex="0" role="region" aria-labelledby="claims-table-caption" class="table-wrapper">
+        <table class="responsive-table claims-table">
+          <caption id="claims-table-caption">Submitted ownership claims awaiting verification</caption>
+          <thead>
+            <tr>
+              <th>Claim ID</th>
+              <th>Report</th>
+              <th>Claimant</th>
+              <th>Verification Answer</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="claims-table-body"></tbody>
+        </table>
+      </div>
+
+      <h3 class="sub-heading">Recent Notifications (CMM-38)</h3>
+      <ul id="notifications-list" class="notifications-list" aria-live="polite"></ul>
+    </section>
+
+    <!-- View 5: Account Sign In / Sign Up (CMM-27, CMM-48) -->
+    <section id="view-account" class="panel" hidden aria-labelledby="account-heading">
+      <div class="panel-header">
+        <h2 id="account-heading">User Registration &amp; Sign In</h2>
+        <span class="badge">CMM-27</span>
+      </div>
+
+      <div class="auth-grid">
+        <form id="signin-form" class="auth-card">
+          <h3>Sign In</h3>
+          <div class="field">
+            <label for="signin-email">Email Address</label>
+            <span id="signin-email-hint" class="hint">Format: you@example.com</span>
+            <input
+              type="email"
+              id="signin-email"
+              name="email"
+              required
+              spellcheck="false"
+              autocomplete="username"
+              enterkeyhint="next"
+              aria-describedby="signin-email-hint"
+              data-error="signin-email-error"
+            >
+            <div id="signin-email-error" class="error-msg">
+              <span role="img" aria-label="Error">❌</span> Enter an email address in the format you@example.com.
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="signin-password">Password</label>
+            <div class="password-row">
+              <input
+                type="password"
+                id="signin-password"
+                name="password"
+                required
+                autocomplete="current-password"
+                enterkeyhint="done"
+                data-error="signin-password-error"
+              >
+              <button type="button" class="btn btn-ghost toggle-pw" data-target="signin-password" aria-pressed="false">Show</button>
+            </div>
+            <div id="signin-password-error" class="error-msg">
+              <span role="img" aria-label="Error">❌</span> Enter your password.
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Sign in</button>
+          <p id="signin-feedback" class="status-note" aria-live="polite"></p>
+        </form>
+
+        <form id="signup-form" class="auth-card">
+          <h3>Create Account</h3>
+          <div class="field">
+            <label for="signup-name">Full Name</label>
+            <input
+              type="text"
+              id="signup-name"
+              name="full-name"
+              required
+              autocomplete="name"
+              enterkeyhint="next"
+              data-error="signup-name-error"
+            >
+            <div id="signup-name-error" class="error-msg">
+              <span role="img" aria-label="Error">❌</span> Enter your full name.
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="signup-email">Email Address</label>
+            <span id="signup-email-hint" class="hint">Format: you@example.com</span>
+            <input
+              type="email"
+              id="signup-email"
+              name="email"
+              required
+              spellcheck="false"
+              autocomplete="username"
+              enterkeyhint="next"
+              aria-describedby="signup-email-hint"
+              data-error="signup-email-error"
+            >
+            <div id="signup-email-error" class="error-msg">
+              <span role="img" aria-label="Error">❌</span> Enter an email address in the format you@example.com.
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="signup-password">New Password</label>
+            <ul id="signup-password-rules" class="rules-list">
+              <li>At least 8 characters</li>
+              <li>One uppercase and one lowercase letter</li>
+              <li>One number and one special character</li>
+            </ul>
+            <div class="password-row">
+              <input
+                type="password"
+                id="signup-password"
+                name="new-password"
+                required
+                autocomplete="new-password"
+                enterkeyhint="done"
+                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}"
+                minlength="8"
+                aria-describedby="signup-password-rules"
+                data-error="signup-password-error"
+              >
+              <button type="button" class="btn btn-ghost toggle-pw" data-target="signup-password" aria-pressed="false">Show</button>
+            </div>
+            <div id="signup-password-error" class="error-msg">
+              <span role="img" aria-label="Error">❌</span> Password doesn't meet all the requirements listed above.
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Create account</button>
+          <p id="signup-feedback" class="status-note" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Native Modal Dialog for Ownership Claim Submission (CMM-31, CMM-60) -->
+  <dialog id="claim-dialog" closedby="any" aria-labelledby="claim-dialog-title">
+    <form id="claim-form" class="dialog-body">
+      <div class="dialog-head">
+        <h1 id="claim-dialog-title">Submit Ownership Claim</h1>
+        <button type="button" id="claim-close-btn" class="btn btn-ghost" aria-label="Close dialog">Close</button>
+      </div>
+
+      <p id="claim-report-summary" class="hint"></p>
+      <p id="claim-question-text" class="claim-question"></p>
+
+      <div class="field">
+        <label for="claim-answer">Your Verification Answer</label>
+        <textarea
+          id="claim-answer"
+          name="verificationAnswer"
+          rows="3"
+          required
+          autofocus
+          data-error="claim-answer-error"
+          placeholder="Describe unique marks, contents, or hidden details to prove ownership..."
+        ></textarea>
+        <div id="claim-answer-error" class="error-msg">
+          <span role="img" aria-label="Error">❌</span> Provide a verification answer before submitting your claim.
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" id="claim-cancel-btn" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary">Submit Claim</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
